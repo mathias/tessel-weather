@@ -3,6 +3,16 @@
 Turns my [Tessel](http://tessel.io) board into a sort of weather station.
 Pushes data to a Heroku app. Must be on wifi to push data.
 
+## cortado-sketch.ino
+
+This file is a simple firmware for the LightBlue
+[Bean](http://punchthrough.com/bean/) (previously called the Cortado) to send
+temperature data over Bluetooth LE (as a serial connection).
+
+In theory, this would allow the Tessel to have another temperature data point
+(say, from another room.) For now, since I don't have the Tessel BLE module, I
+haven't fully integrated it.
+
 ## License
 
 Copyright (c) 2012 Matt Gauger
