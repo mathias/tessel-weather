@@ -2,7 +2,8 @@ var tessel = require('tessel'),
     ambientLib = require('ambient-attx4'),
     climateLib = require('climate-si7020'),
     wifi = require('wifi-cc3000'),
-    http = require('http');
+    http = require('http'),
+    _ = require('lodash');
 
 var serverHost = '192.168.1.106',
     serverPort = 8000;
@@ -54,6 +55,8 @@ climate.on('error', function(err) {
 var loop = function() {
   var temp, humidity, lightLevel, soundLevel;
 
+  var payload = {};
+
   if (climateReady) {
     climate.readTemperature('f', function (err, tempReading) {
       temp = tempReading.toFixed(2);
@@ -63,6 +66,11 @@ var loop = function() {
     climate.readHumidity(function (err, humid) {
       humidity = humid.toFixed(4);
       console.log('Humidity:', humidity + '%RH');
+    });
+
+    payload = _.merge(payload, {
+      temperatureF: temp,
+      humidity: humidity
     });
 
     ledOn(led1);
@@ -80,17 +88,18 @@ var loop = function() {
       console.log('Sound Level:', soundLevel);
     });
 
+    payload = _.merge(payload, {
+      lightLevel: lightLevel,
+      soundLevel: soundLevel
+    });
+
     ledOn(led2);
   }
 
   if (wifi.isConnected()) {
-    var payload = {
-      temperatureF: temp,
-      humidity: humidity,
-      lightLevel: lightLevel,
-      soundLevel: soundLevel,
+    payload = _.merge(payload, {
       timestampUtc: Date.now()
-    };
+    });
 
     var respHandler = function(response) {
       var responseStr = '';

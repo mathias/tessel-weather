@@ -6,7 +6,7 @@
     "ambient-attx4": "0.1.9",
     "climate-si7020": "0.1.0",
     "relay-mono": "0.1.2",
-    "underscore": "1.6.0",
+    "lodash": "2.4.x",
     "request": "2.44.x"
   }
 }
