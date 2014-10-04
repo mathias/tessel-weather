@@ -127,7 +127,7 @@ var loop = function() {
 
   ledOff(led1);
   ledOff(led2);
-  setTimeout(loop, 1000);
+  setTimeout(loop, 5000);
 };
 
 setImmediate(loop);
