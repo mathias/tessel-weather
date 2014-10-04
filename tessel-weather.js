@@ -6,7 +6,8 @@ var tessel = require('tessel'),
     _ = require('lodash');
 
 var serverHost = '192.168.1.106',
-    serverPort = 8000;
+    serverPort = 8000,
+    secondsBetweenReadings = 1000 * 60; // Once a minute
 
 var httpHeaders = {
   'Content-Type': 'application/json'
@@ -127,7 +128,7 @@ var loop = function() {
 
   ledOff(led1);
   ledOff(led2);
-  setTimeout(loop, 5000);
+  setTimeout(loop, secondsBetweenReadings);
 };
 
 setImmediate(loop);
