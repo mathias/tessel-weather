@@ -114,6 +114,34 @@ var loop = function() {
 };
 
 ambient.on('ready', function() {
+  ambient.setLightTrigger(0.5);
+  ambient.setSoundTrigger(0.03);
+
+  ambient.on('sound-trigger', function(data) {
+    console.log("Sound threshold was reached", data.toFixed(8));
+    postSoundLevel(data.toFixed(8));
+
+    // Clear the trigger so it stops firing
+    ambient.clearSoundTrigger();
+
+    setTimeout(function() {
+      ambient.setSoundTrigger(soundThreshold);
+    }, 1500);
+  });
+
+  ambient.on('light-trigger', function(data) {
+    console.log("Light threshold was reached", data.toFixed(8));
+
+    postLightLevel(data.toFixed(8));
+
+    // Clear the trigger so it stops firing
+    ambient.clearLightTrigger();
+
+    setTimeout(function() {
+      ambient.setLightTrigger(0.5);
+    }, 1500);
+  });
+
   climate.on('ready', function() {
     console.log("Initialized");
     setImmediate(loop);
