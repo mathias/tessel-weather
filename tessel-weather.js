@@ -6,44 +6,30 @@ var tessel = require('tessel'),
     _ = require('lodash');
 
 var serverHost = '192.168.1.106',
-    serverPort = 8000,
-    secondsBetweenReadings = 1000 * 60; // Once a minute
-
-var httpHeaders = {
-  'Content-Type': 'application/json'
-};
+    serverPort = 3000,
+    secretToken = 'cookie', // change to production token
+    secondsBetweenReadings = 1000 * 5; // Once a minute
 
 var httpOptions = {
   method: 'POST',
   host: serverHost,
   port: serverPort,
-  path: '/reading',
-  headers: httpHeaders
+  path: '/readings',
 };
 
 var ambient = ambientLib.use(tessel.port['D']),
     climate = climateLib.use(tessel.port['A']);
 
 var led1 = tessel.led[0],
-    led2 = tessel.led[1],
-    ledOn = function(led) {
-      return led.write(1);
-    },
-    ledOff = function(led) {
-      return led.write(0);
-    };
+    led2 = tessel.led[1];
 
+var ledOn = function(led) {
+  return led.write(1);
+};
 
-var ambientReady = false,
-    climateReady = false;
-
-ambient.on('ready', function() {
-  ambientReady = true;
-});
-
-climate.on('ready', function() {
-  climateReady = true;
-});
+var ledOff = function(led) {
+  return led.write(0);
+};
 
 ambient.on('error', function(err) {
   console.log('Error initializing ambient module:', err);
@@ -56,51 +42,43 @@ climate.on('error', function(err) {
 var loop = function() {
   var temp, humidity, lightLevel, soundLevel;
 
-  var payload = {};
+  climate.readTemperature('f', function (err, tempReading) {
+    temp = tempReading.toFixed(2);
+    console.log('Degrees:', temp + 'F');
+  });
 
-  if (climateReady) {
-    climate.readTemperature('f', function (err, tempReading) {
-      temp = tempReading.toFixed(2);
-      console.log('Degrees:', temp + 'F');
-    });
-
-    climate.readHumidity(function (err, humid) {
-      humidity = humid.toFixed(4);
-      console.log('Humidity:', humidity + '%RH');
-    });
-
-    payload = _.merge(payload, {
-      temperatureF: temp,
-      humidity: humidity
-    });
-
-    ledOn(led1);
-  }
-
-  if (ambientReady) {
-    ambient.getLightLevel(function(err, ldata) {
-      lightLevel =  ldata.toFixed(8);
-      console.log('Light Level:', lightLevel);
-    });
+  climate.readHumidity(function (err, humid) {
+    humidity = humid.toFixed(4);
+    console.log('Humidity:', humidity + '%RH');
+  });
 
 
-    ambient.getSoundLevel(function(err, sdata) {
-      soundLevel = sdata.toFixed(8);
-      console.log('Sound Level:', soundLevel);
-    });
+  ambient.getLightLevel(function(err, ldata) {
+    lightLevel =  ldata.toFixed(8);
+    console.log('Light Level:', lightLevel);
+  });
 
-    payload = _.merge(payload, {
-      lightLevel: lightLevel,
-      soundLevel: soundLevel
-    });
 
-    ledOn(led2);
-  }
+  ambient.getSoundLevel(function(err, sdata) {
+    soundLevel = sdata.toFixed(8);
+    console.log('Sound Level:', soundLevel);
+  });
+
+  ledOn(led2);
 
   if (wifi.isConnected()) {
-    payload = _.merge(payload, {
-      timestampUtc: Date.now()
-    });
+    var timestamp = (new Date()).toJSON();
+
+    var payload = {
+      secret_token: secretToken,
+      reading: {
+        timestamp: timestamp,
+        temperature_f: temp,
+        humidity: humidity,
+        light_level: lightLevel,
+        sound_level: soundLevel
+      }
+    };
 
     var respHandler = function(response) {
       var responseStr = '';
@@ -116,13 +94,22 @@ var loop = function() {
       });
     };
 
-    var req = http.request(httpOptions, respHandler);
+    var req = http.request(_.merge(httpOptions,
+                                   {headers: {
+                                     'Content-Type': 'application/json',
+                                     'Content-Length': payload.length
+                                   }}),
+                           respHandler);
 
     req.on('error', function(e) {
       console.log('HTTP request encountered error:', e);
     });
 
+    console.log('POSTing at:', timestamp);
+    console.log('Payload:', payload);
+
     req.write(JSON.stringify(payload));
+
     req.end();
   }
 
@@ -131,4 +118,9 @@ var loop = function() {
   setTimeout(loop, secondsBetweenReadings);
 };
 
-setImmediate(loop);
+ambient.on('ready', function() {
+  climate.on('ready', function() {
+    console.log("Initialized");
+    setImmediate(loop);
+  });
+});
