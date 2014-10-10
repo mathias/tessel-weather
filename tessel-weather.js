@@ -62,7 +62,7 @@ var post = function(path, data) {
       var req = http.request(postOptions(path));
 
       req.on('error', function(e) {
-        console.log('Error contacting server.', error);
+        console.log('Error contacting server.', e);
       });
 
       req.write(payload);
@@ -109,8 +109,8 @@ var postReading = function(temp, humidity, slevel, llevel) {
     post('/sensor_readings', {
       temperature: {temperature_f: temp},
       humidity: {humidity: humidity},
-      sound_level: {level: level},
-      light_level: {level: level}
+      sound_level: {level: slevel},
+      light_level: {level: llevel}
     });
   }
 };
@@ -118,16 +118,6 @@ var postReading = function(temp, humidity, slevel, llevel) {
 var printStats = function() {
   console.log("Memory usage:", process.memoryUsage());
 };
-
-var outerLoop = function() {
-  if (ambientReady && climateReady) {
-    loop();
-  } else {
-    console.log("Modules not ready.");
-  }
-
-  setTimeout(loop, secondsBetweenReadings);
-}
 
 var loop = function() {
   ledOn(led1);
@@ -169,6 +159,16 @@ var loop = function() {
   ledOff(led1);
   ledOff(led2);
 
+};
+
+var outerLoop = function() {
+  if (ambientReady && climateReady) {
+    loop();
+  } else {
+    console.log("Modules not ready.");
+  }
+
+  setTimeout(loop, secondsBetweenReadings);
 };
 
 wifi.on('disconnect', function(err, data){
