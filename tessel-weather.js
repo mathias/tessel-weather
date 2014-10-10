@@ -152,7 +152,7 @@ var loop = function() {
     //postSoundLevel(soundLevel);
   });
 
-  postReading(temp, humidity, slevel, llevel);
+  postReading(temp, humidity, soundLevel, lightLevel);
 
   ledOff(led1);
   ledOff(led2);
