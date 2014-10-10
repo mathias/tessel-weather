@@ -171,8 +171,14 @@ wifi.on('error', function(err){
 ambient.on('ready', function() {
   console.log("Ambient Module Initialized");
 
+  climate.on('ready', function() {
+    console.log("Climate Module Initialized");
+    setImmediate(loop);
+  });
+
   var soundTrigger = 0.03,
-      lightTrigger = 0.5;
+      lightTrigger = 0.5,
+      timeBetweenTriggers = 1500;
 
   ambient.setLightTrigger(lightTrigger);
   ambient.setSoundTrigger(soundTrigger);
@@ -185,8 +191,8 @@ ambient.on('ready', function() {
     ambient.clearSoundTrigger();
 
     setTimeout(function() {
-      ambient.setSoundTrigge(soundTrigger);
-    }, 1500);
+      ambient.setSoundTrigger(soundTrigger);
+    }, timeBetweenTriggers);
   });
 
   ambient.on('light-trigger', function(data) {
@@ -199,11 +205,6 @@ ambient.on('ready', function() {
 
     setTimeout(function() {
       ambient.setLightTrigger(lightTrigger);
-    }, 1500);
-  });
-
-  climate.on('ready', function() {
-    console.log("Climate Module Initialized");
-    setImmediate(loop);
+    }, timeBetweenTriggers);
   });
 });
