@@ -16,8 +16,7 @@ var led1 = tessel.led[0],
 var serverHost = '192.168.1.106',
     serverPort = 3000,
     secretToken = 'cookie', // change to production token
-    secondsBetweenReadings = 1000 * 30, // Should be about once a minute in production
-    urlToPost = "http://" + serverHost + ":" + serverPort;
+    secondsBetweenReadings = 1000 * 30; // change to once a minute for production
 
 var postOptions = function(path) {
   return {
@@ -48,15 +47,6 @@ climate.on('error', function(err) {
   console.log('Error connecting module:', err);
 });
 
-var postCallback = function(error, response) {
-  if (!error && response && response.statusCode == 200) {
-    console.log('POST success');
-  } else { 
-    console.log('Error contacting server.', error);
-  }
-  ledOff(led1);
-};
-
 var post = function(path, data) {
   if (wifi.isConnected()) {
     console.log('Attempting to POST to', path);
@@ -64,9 +54,6 @@ var post = function(path, data) {
     var payload = _.merge(data, {secret_token: secretToken});
 
     ledOn(led1);
-
-    //needle.post(urlToPost + path, payload, postCallback);
-    //
 
     try {
       var req = http.request(postOptions(path));
@@ -77,7 +64,6 @@ var post = function(path, data) {
 
       req.write(payload);
       req.end();
-
 
       ledOff(led1);
     } catch (e) {
@@ -178,6 +164,8 @@ wifi.on('error', function(err){
 });
 
 ambient.on('ready', function() {
+  console.log("Ambient Module Initialized");
+
   ambient.setLightTrigger(0.5);
   ambient.setSoundTrigger(0.03);
 
@@ -207,7 +195,7 @@ ambient.on('ready', function() {
   });
 
   climate.on('ready', function() {
-    console.log("Initialized");
+    console.log("Climate Module Initialized");
     setImmediate(loop);
   });
 });
