@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "devDependencies": {
-    "ambient-attx4": "0.1.9",
-    "climate-si7020": "0.1.0",
-    "relay-mono": "0.1.2",
-    "lodash": "2.4.x",
-    "needle": "0.7.10"
+    "ambient-attx4": "latest",
+    "climate-si7020": "latest",
+    "relay-mono": "latest",
+    "wifi-cc3000": "latest",
+    "lodash": "2.4.x"
   }
 }
