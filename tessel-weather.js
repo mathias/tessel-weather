@@ -9,6 +9,9 @@ var tessel = require('tessel'),
 var ambient = ambientLib.use(tessel.port['D']),
     climate = climateLib.use(tessel.port['A']);
 
+var climateReady = false,
+    ambientReady = false;
+
 var led1 = tessel.led[0],
     led2 = tessel.led[1];
 
@@ -113,9 +116,18 @@ var postReading = function(temp, humidity, slevel, llevel) {
 };
 
 var printStats = function() {
-  console.log("Tessel stats:");
   console.log("Memory usage:", process.memoryUsage());
 };
+
+var outerLoop = function() {
+  if (ambientReady && climateReady) {
+    loop();
+  } else {
+    console.log("Modules not ready.");
+  }
+
+  setTimeout(loop, secondsBetweenReadings);
+}
 
 var loop = function() {
   ledOn(led1);
@@ -157,7 +169,6 @@ var loop = function() {
   ledOff(led1);
   ledOff(led2);
 
-  setTimeout(loop, secondsBetweenReadings);
 };
 
 wifi.on('disconnect', function(err, data){
@@ -170,11 +181,7 @@ wifi.on('error', function(err){
 
 ambient.on('ready', function() {
   console.log("Ambient Module Initialized");
-
-  climate.on('ready', function() {
-    console.log("Climate Module Initialized");
-    setImmediate(loop);
-  });
+  ambientReady = true;
 
   var soundTrigger = 0.03,
       lightTrigger = 0.5,
@@ -208,3 +215,10 @@ ambient.on('ready', function() {
     }, timeBetweenTriggers);
   });
 });
+
+climate.on('ready', function() {
+  console.log("Climate Module Initialized");
+  climateReady = true;
+});
+
+setImmediate(outerLoop);
