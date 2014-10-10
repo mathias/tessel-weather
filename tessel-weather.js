@@ -120,15 +120,18 @@ var printStats = function() {
 var loop = function() {
   ledOn(led1);
   printStats();
+  var temp, humidity, lightLevel, soundLevel;
 
   climate.readTemperature('f', function (err, tempReading) {
-    var temp = tempReading.toFixed(2);
+    temp = tempReading.toFixed(2);
+
     console.log('Degrees:', temp + 'F');
     //postTemperature(temp);
   });
 
   climate.readHumidity(function (err, humid) {
-    var humidity = humid.toFixed(4);
+    humidity = humid.toFixed(4);
+
     console.log('Humidity:', humidity + '%RH');
     //postHumidity(humidity);
   });
@@ -136,13 +139,15 @@ var loop = function() {
   ledOn(led2);
 
   ambient.getLightLevel(function(err, ldata) {
-    var lightLevel =  ldata.toFixed(8);
+    lightLevel =  ldata.toFixed(8);
+
     console.log('Light Level:', lightLevel);
     //postLightLevel(lightLevel);
   });
 
   ambient.getSoundLevel(function(err, sdata) {
-    var soundLevel = sdata.toFixed(8);
+    soundLevel = sdata.toFixed(8);
+
     console.log('Sound Level:', soundLevel);
     //postSoundLevel(soundLevel);
   });
@@ -166,8 +171,11 @@ wifi.on('error', function(err){
 ambient.on('ready', function() {
   console.log("Ambient Module Initialized");
 
-  ambient.setLightTrigger(0.5);
-  ambient.setSoundTrigger(0.03);
+  var soundTrigger = 0.03,
+      lightTrigger = 0.5;
+
+  ambient.setLightTrigger(lightTrigger);
+  ambient.setSoundTrigger(soundTrigger);
 
   ambient.on('sound-trigger', function(data) {
     console.log("Sound threshold was reached", data.toFixed(8));
@@ -177,7 +185,7 @@ ambient.on('ready', function() {
     ambient.clearSoundTrigger();
 
     setTimeout(function() {
-      ambient.setSoundTrigger(soundThreshold);
+      ambient.setSoundTrigge(soundTrigger);
     }, 1500);
   });
 
@@ -190,7 +198,7 @@ ambient.on('ready', function() {
     ambient.clearLightTrigger();
 
     setTimeout(function() {
-      ambient.setLightTrigger(0.5);
+      ambient.setLightTrigger(lightTrigger);
     }, 1500);
   });
 
