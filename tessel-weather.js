@@ -59,7 +59,15 @@ var post = function(path, data) {
     ledOn(led1);
 
     try {
-      var req = http.request(postOptions(path));
+      var req = http.request(postOptions(path), function(res) {
+        console.log('STATUS: ' + res.statusCode);
+        console.log('HEADERS: ' + JSON.stringify(res.headers));
+        res.setEncoding('utf8');
+
+        res.on('data', function (chunk) {
+          console.log('BODY: ' + chunk);
+        });
+      });
 
       req.on('error', function(e) {
         console.log('Error contacting server.', e);
