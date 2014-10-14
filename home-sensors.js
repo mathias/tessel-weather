@@ -14,9 +14,9 @@ climate.on('ready', function () {
 
   // Loop forever
   setImmediate(function loop() {
-    climate.readTemperature('c', function (err, temp) {
+    climate.readTemperature('f', function (err, temp) {
       climate.readHumidity(function (err, humid) {
-        updateSensor({temp: temp, humidity: humid});
+        updateSensor({temperature_f: temp, humidity: humid});
         setTimeout(loop, 6000);
       });
     });
